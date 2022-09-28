@@ -4,7 +4,7 @@ with open('packet.bin', 'rb') as packet:
         buffer = packet.read(0x8)
         if buffer not in data:
             data.append(buffer)
-            with open(f'packet_{x}.bin', 'wb') as packet_spl:
+            with open(f'cmd_{x}.bin', 'wb') as packet_spl:
                 packet_spl.write(buffer)
                 
         
