@@ -3,7 +3,7 @@
 
 This is my attempt at reverse engineering the control stack for the *Snaptain S5C* drone. I am doing this not only to understand the internal structure of the drone more, but also to control it from any IoT device.
 
-See [here]('Notes.md') for my notes. They are volatile, so be warned.
+See [here](Notes.md) for my notes. They are volatile, so be warned.
 
 See the directory `s5c-py` for the library/control interface I wrote in Python. This interface is designed to test commands, and is not fully fleshed out yet.
 
