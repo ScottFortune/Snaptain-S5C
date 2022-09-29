@@ -1,12 +1,55 @@
-import keyboard
 from TCPStream import *
 from UDPStream import *
+from pydualsense import pydualsense, TriggerModes
 
+TakeoffEnabled = False
+Delta = {
+    'Flag' : 0x0,
+    'X' : 0x0,
+    'Y' : 0x0,
+    'Z' : 0x0,
+    'Rotation' : 0x0
+}
 Host = '172.17.10.1'
 Ports = {
-    'TCP' : 8888,
-    'UDP' : 9125
+    'TCP': 8888,
+    'UDP': 9125
 }
+
+def options_pressed(state):
+    global TakeoffEnabled
+    if not TakeoffEnabled:
+        TakeoffEnabled = True
+        DualSense.light.setColorI(0, 255, 0) 
+        DualSense.triggerL.setForce(1, 255)
+        DualSense.triggerR.setForce(1, 255)
+    Delta['Flag'] = state
+    print(Delta['Flag'])
+
+def dxdy(stateX, stateY):
+    if stateX > 0x14 or stateX < 0x14:
+        Delta['X'] = stateX
+    if stateY > 0x14 or stateY < 0x14:
+        Delta['Y'] = -stateY
+
+def pdz(state):
+    Delta['Z'] = state // 2 
+
+def ndz(state):
+    Delta['Z'] = -state // 2 
+
+DualSense = pydualsense()  # open controller
+DualSense.init()  # initialize controller
+
+DualSense.option_pressed += options_pressed
+DualSense.left_joystick_changed += dxdy
+DualSense.l2_changed += pdz
+DualSense.r2_changed += ndz
+DualSense.light.setColorI(255, 0, 0) 
+DualSense.triggerL.setMode(TriggerModes.Rigid)
+DualSense.triggerL.setForce(1, 0)
+DualSense.triggerR.setMode(TriggerModes.Rigid)
+DualSense.triggerR.setForce(1, 0)
 
 TCP = TCPStream()
 print('[+] Connecting to TCP...')
@@ -19,42 +62,12 @@ UDP = UDPStream()
 print('[+] Connecting to UDP...')
 UDP.Connect(Host, Ports['UDP'])
 print('[+] Connected to UDP.')
-Delta = 0x30
-Actions = {
-    'Takeoff' : (0x1, 0x80, 0x80, 0x80, 0x80),
-    'Idle' : (0x0, 0x80, 0x80, 0x80, 0x80),
-    'Forward' : (0x0, 0x80, 0x80 + Delta, 0x80, 0x80),
-    'Backward' : (0x0, 0x80, 0x80 - Delta, 0x80, 0x80),
-    'Left' : (0x0, 0x80 + Delta, 0x80, 0x80, 0x80),
-    'Right' : (0x0, 0x80 - Delta, 0x80, 0x80, 0x80),
-    'Up' : (0x0, 0x80, 0x80, 0x80 + Delta, 0x80),
-    'Down' : (0x0, 0x80, 0x80, 0x80 - Delta, 0x80),
-}
 
-while True:
-    if keyboard.is_pressed('t'):
-        UDP.SendCommand(*Actions['Takeoff'])    
 
-    elif keyboard.is_pressed('l'):
-        UDP.SendCommand(*Actions['Idle'])
-        UDP.Disconnect()
-        exit(0)
-    
-    elif keyboard.is_pressed('w'):
-        UDP.SendCommand(*Actions['Forward'])
+while not DualSense.state.R1:
+    if TakeoffEnabled:
+        UDP.SendCommand(Delta['Flag'], 0x80 + Delta['X'], 0x80 + Delta['Y'], 0x80 + Delta['Z'], 0x80 + Delta['Rotation'])
 
-    elif keyboard.is_pressed('s'):
-        UDP.SendCommand(*Actions['Backward'])
-
-    elif keyboard.is_pressed('a'):
-        UDP.SendCommand(*Actions['Left'])
-
-    elif keyboard.is_pressed('d'):
-        UDP.SendCommand(*Actions['Right'])
-
-    elif keyboard.is_pressed('space'):
-        UDP.SendCommand(*Actions['Up'])
-
-    elif keyboard.is_pressed('c'):
-        UDP.SendCommand(*Actions['Down'])
+DualSense.close()
+exit()
 

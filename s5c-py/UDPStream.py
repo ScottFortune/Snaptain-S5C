@@ -22,4 +22,5 @@ class UDPStream:
         SendBuf += byte(index)
         SendBuf += byte(reduce(lambda x, y: x ^ y, SendBuf[1:6]))
         SendBuf += b'\x99'
+        print(SendBuf)
         self.Socket.send(SendBuf)
