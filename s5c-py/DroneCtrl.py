@@ -1,6 +1,7 @@
 from TCPStream import *
 from UDPStream import *
-from pydualsense import pydualsense, TriggerModes
+import pygame
+from pygame.locals import *
 
 TakeoffEnabled = False
 Delta = {
@@ -16,41 +17,6 @@ Ports = {
     'UDP': 9125
 }
 
-def options_pressed(state):
-    global TakeoffEnabled
-    if not TakeoffEnabled:
-        TakeoffEnabled = True
-        DualSense.light.setColorI(0, 255, 0) 
-        DualSense.triggerL.setForce(1, 255)
-        DualSense.triggerR.setForce(1, 255)
-    Delta['Flag'] = state
-    print(Delta['Flag'])
-
-def dxdy(stateX, stateY):
-    if stateX > 0x14 or stateX < 0x14:
-        Delta['X'] = stateX
-    if stateY > 0x14 or stateY < 0x14:
-        Delta['Y'] = -stateY
-
-def pdz(state):
-    Delta['Z'] = state // 2 
-
-def ndz(state):
-    Delta['Z'] = -state // 2 
-
-DualSense = pydualsense()  # open controller
-DualSense.init()  # initialize controller
-
-DualSense.option_pressed += options_pressed
-DualSense.left_joystick_changed += dxdy
-DualSense.l2_changed += pdz
-DualSense.r2_changed += ndz
-DualSense.light.setColorI(255, 0, 0) 
-DualSense.triggerL.setMode(TriggerModes.Rigid)
-DualSense.triggerL.setForce(1, 0)
-DualSense.triggerR.setMode(TriggerModes.Rigid)
-DualSense.triggerR.setForce(1, 0)
-
 TCP = TCPStream()
 print('[+] Connecting to TCP...')
 TCP.Connect(Host, Ports['TCP'])
@@ -63,11 +29,26 @@ print('[+] Connecting to UDP...')
 UDP.Connect(Host, Ports['UDP'])
 print('[+] Connected to UDP.')
 
+Range = 0x30
+Z_Range = 0x10
+pygame.init()
+pygame.joystick.init()
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
 
-while not DualSense.state.R1:
+while True:
+    Delta['X'] = int(joystick.get_axis(0) * Range)
+    Delta['Y'] = -int(joystick.get_axis(1) * Range)
+    if joystick.get_axis(5) > 0.0 or joystick.get_axis(2) > 0.0:
+        Delta['Z'] = int(joystick.get_axis(5) * Z_Range) - int(joystick.get_axis(2) * Z_Range)
+    else:
+        Delta['Z'] = 0
     if TakeoffEnabled:
         UDP.SendCommand(Delta['Flag'], 0x80 + Delta['X'], 0x80 + Delta['Y'], 0x80 + Delta['Z'], 0x80 + Delta['Rotation'])
+    for event in pygame.event.get():
+        if event.type == pygame.JOYBUTTONDOWN and joystick.get_button(9):
+            Delta['Flag'] = 0x1
+            TakeoffEnabled = True
+ 
 
-DualSense.close()
-exit()
 
