@@ -8,7 +8,6 @@ See [here](Notes.md) for my notes. They are volatile, so be warned.
 See the directory `s5c-py` for the library/control interface I wrote in Python. This interface is designed to test commands, and is not fully fleshed out yet.
 
 # To-Do
-- Interface a Dualsense controller for easier intuitive control.
 - Finish reverse engineering the transmission control protocol packet data.
 
 # Credits
