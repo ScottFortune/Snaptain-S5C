@@ -1,0 +1,13 @@
+0000   00 00 0c ac 11 0a 00 09 2d 01 02 03 08 00 45 00   ........-.....E.
+0010   00 92 00 02 00 00 40 06 03 a0 c0 a8 00 0a ac 11   ......@.........
+0020   0a 01 7f fb 22 b8 00 00 00 01 00 00 00 01 50 18   ....".........P.
+0030   10 00 8f b2 00 00 49 54 64 00 00 00 53 00 00 00   ......ITd...S...
+0040   69 53 1d 44 5f 73 bd a1 6f 27 d3 1d 1a 2d e9 7e   iS.D_s..o'...-.~
+0050   92 db 3e 6a fc 10 50 2d 79 80 0c a1 a5 e5 ba d4   ..>j..P-y.......
+0060   aa 2d 95 15 81 b4 ab 82 2f 3f db d0 07 38 a6 2f   .-....../?...8./
+0070   8a 31 44 a7 32 2c 11 dc 24 5d e0 17 f9 14 4c cc   .1D.2,..$]....L.
+0080   36 ab 51 9f 82 4a 9c b3 44 a8 67 ef 57 37 be 8f   6.Q..J..D.g.W7..
+0090   3d cd 9f 85 01 bd 44 29 48 ee f5 a1 2f 4c 8a fc   =.....D)H.../L..
+
+Immediately after this was sent to the drone, the drone sent back tcp packets containing large data
+which the app replied to with acks. Most likely correlates to an image being requested and sent
