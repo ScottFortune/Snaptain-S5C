@@ -1,0 +1,16 @@
+{
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "../college-classes-f22/COMPSCI 383/Projects/HW1-8 Puzzle Search"
+        },
+        {
+            "path": "../scottfortune.github.io"
+        }
+    ],
+    "settings": {
+        "liveServer.settings.multiRootWorkspaceName": "scottfortune.github.io"
+    }
+}
