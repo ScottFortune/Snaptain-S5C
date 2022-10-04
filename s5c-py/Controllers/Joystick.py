@@ -37,6 +37,7 @@ class Joystick(AbstractController):
                             match event.button:
                                 case 9: # Options button on PS5 controller.
                                     self.Delta['Flag'] = 0x1
+                                    print("pressed start")
                                 case 4:
                                     self.Delta['Rotation'] = -0x20
                                 case 5:

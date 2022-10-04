@@ -1,4 +1,5 @@
 from asyncio import Handle
+from platform import java_ver
 from Controllers.Joystick import Joystick
 from Controllers.Keyboard import Keyboard
 from TCPStream import *
@@ -6,6 +7,9 @@ from UDPStream import *
 import pygame
 from pygame.locals import *
 import threading
+import ffmpeg
+import cv2
+import numpy as np
 
 Host = '172.17.10.1'
 Ports = {
@@ -51,7 +55,5 @@ VideoThread.start()
 Handler.start()
 
 while True:
-    print(Handler.GetDelta('Flag'))
+    #print(Handler.GetDelta('Flag'))
     UDP.SendCommand(Handler.GetDelta('Flag'), 0x80 + Handler.GetDelta('X'), 0x80 + Handler.GetDelta('Y'), 0x80 + Handler.GetDelta('Z'), 0x80 + Handler.GetDelta('Rotation'))
-
-
