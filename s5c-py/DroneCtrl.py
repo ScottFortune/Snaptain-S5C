@@ -1,4 +1,6 @@
 from asyncio import Handle
+
+import numpy
 from Controllers.Joystick import Joystick
 from Controllers.Keyboard import Keyboard
 from TCPStream import *
@@ -6,6 +8,9 @@ from UDPStream import *
 import pygame
 from pygame.locals import *
 import threading
+import h264decoder
+import cv2
+
 
 Host = '172.17.10.1'
 Ports = {
@@ -27,7 +32,7 @@ while Handler == None:
             Handler = Joystick()
         case 'k':
             Handler = Keyboard()
-        
+
 
 TCP = TCPStream()
 print('[+] Connecting to TCP...')
@@ -41,17 +46,29 @@ print('[+] Connecting to UDP...')
 UDP.Connect(Host, Ports['UDP'])
 print('[+] Connected to UDP.')
 
+
 def VideoStreamHandler():
-    with open('strm.h264', 'ab') as strm:
-        while True:
-            strm.write(TCP.Receive(0x400))
+    decoder = h264decoder.H264Decoder()
+    while True:
+        buffer = TCP.Receive(0x800)
+        if not buffer:
+            continue
+        framedata = decoder.decode(buffer)
+        if not framedata:
+            continue
+        for frame in framedata:
+            (d, w, h, l) = frame
+            d = numpy.frombuffer(d, dtype=numpy.ubyte, count=len(d))
+            d = d.reshape((h, l//3, 3))
+            d = d[:, :w, :]
+            cv2.imshow('win', d)
+            cv2.waitKey(1)
+        
 
 VideoThread = threading.Thread(target=VideoStreamHandler, args=())
 VideoThread.start()
 Handler.start()
 
 while True:
-    print(Handler.GetDelta('Flag'))
-    UDP.SendCommand(Handler.GetDelta('Flag'), 0x80 + Handler.GetDelta('X'), 0x80 + Handler.GetDelta('Y'), 0x80 + Handler.GetDelta('Z'), 0x80 + Handler.GetDelta('Rotation'))
-
-
+    UDP.SendCommand(Handler.GetDelta('Flag'), 0x80 + Handler.GetDelta('X'), 0x80 +
+                    Handler.GetDelta('Y'), 0x80 + Handler.GetDelta('Z'), 0x80 + Handler.GetDelta('Rotation'))
